@@ -145,6 +145,9 @@
             <div class="nav-item" id="install-btn" onclick="installPWA()">
                 <i class="fas fa-download"></i> <span class="title">Install App</span>
             </div>
+<button id="btnInstall" style="display: none; padding: 10px 20px; background: linear-gradient(135deg, #8B5CF6, #EC4899); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin: 10px auto;">
+    <i class="fas fa-download"></i> Install Aplikasi
+</button>
         </nav>
 
         <main class="main-content">
@@ -504,5 +507,44 @@
         // Init App
         checkAuth();
     </script>
+    <script>
+    let deferredPrompt;
+    const btnInstall = document.getElementById('btnInstall');
+
+    // Mencegah Chrome memunculkan prompt bawaan dan menangkap event-nya
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Munculkan tombol install buatan kita
+        btnInstall.style.display = 'block'; 
+    });
+
+    // Apa yang terjadi saat tombol diklik
+    btnInstall.addEventListener('click', async () => {
+        if (deferredPrompt !== null) {
+            // Tampilkan prompt instalasi bawaan browser
+            deferredPrompt.prompt();
+            
+            // Tunggu respon pengguna (apakah menekan 'Install' atau 'Cancel')
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('User menerima instalasi');
+                // Sembunyikan tombol setelah berhasil diinstal
+                btnInstall.style.display = 'none'; 
+            }
+            
+            // Kosongkan prompt agar tidak bisa dipanggil dua kali
+            deferredPrompt = null;
+        }
+    });
+
+    // Opsional: Sembunyikan tombol jika aplikasi sudah berjalan sebagai PWA (standalone)
+    window.addEventListener('appinstalled', () => {
+        btnInstall.style.display = 'none';
+        console.log('PWA berhasil diinstal');
+    });
+</script>
 </body>
 </html>
