@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cashflow UMKM Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF3366">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        
+        :root {
+            --primary: #FF3366; /* Vibrant Pink/Red */
+            --secondary: #20D2D2; /* Cyan */
+            --accent: #FFD166; /* Yellow */
+            --success: #06D6A0; /* Green */
+            --bg: #F4F7FE;
+            --card-bg: #FFFFFF;
+            --text-dark: #2B2D42;
+            --text-light: #8D99AE;
+            --shadow: 0 8px 20px rgba(0,0,0,0.05);
+            --radius: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg); color: var(--text-dark); overflow-x: hidden; }
+
+        /* --- Auth Screen --- */
+        #auth-screen {
+            display: flex; height: 100vh; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: var(--radius);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 90%; max-width: 400px; text-align: center;
+        }
+        .auth-card h2 { color: var(--primary); margin-bottom: 1.5rem; font-weight: 800; }
+        .input-group { margin-bottom: 1rem; text-align: left; }
+        .input-group input {
+            width: 100%; padding: 12px 15px; border: 2px solid #E2E8F0; border-radius: 10px;
+            font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        .input-group input:focus { border-color: var(--secondary); }
+        .btn {
+            width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
+            font-weight: 600; font-size: 1rem; color: white; transition: transform 0.2s; margin-bottom: 10px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--primary); }
+        .btn-secondary { background-color: var(--secondary); }
+        .auth-toggle { font-size: 0.9rem; color: var(--text-light); cursor: pointer; }
+
+        /* --- App Screen --- */
+        #app-screen { display: none; height: 100vh; }
+        .nav-menu { background: var(--card-bg); box-shadow: var(--shadow); z-index: 100; }
+        .nav-item { 
+            padding: 15px; cursor: pointer; color: var(--text-light); font-weight: 600;
+            display: flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 1.2rem; }
+        
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* Cards */
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .summary-card { 
+            padding: 20px; border-radius: var(--radius); color: white; display: flex; flex-direction: column; gap: 5px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .bg-income { background: linear-gradient(135deg, var(--success), #04B486); }
+        .bg-expense { background: linear-gradient(135deg, var(--primary), #D81B60); }
+        .bg-balance { background: linear-gradient(135deg, var(--secondary), #00A896); }
+        
+        /* Forms & Tables */
+        .form-row { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
+        select, input[type="date"], input[type="number"], input[type="text"] {
+            width: 100%; padding: 12px; border: 2px solid #E2E8F0; border-radius: 10px; outline: none; font-family: 'Poppins';
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; }
+        th { color: var(--text-light); font-weight: 600; }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: white; }
+        .badge.pendapatan { background: var(--success); }
+        .badge.pengeluaran { background: var(--primary); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- RESPONSIVE LAYOUTS --- */
+        /* Desktop & Tablet */
+        @media (min-width: 768px) {
+            #app-screen { display: flex; }
+            .nav-menu { width: 250px; height: 100vh; flex-direction: column; padding-top: 20px; display: block; }
+            .nav-item { margin: 10px 20px; border-radius: 10px; }
+            .nav-item:hover { background: var(--bg); }
+            .bottom-nav { display: none; }
+            .form-row { grid-template-columns: 1fr 1fr; }
+            .app-title { text-align: center; font-weight: 800; color: var(--primary); margin-bottom: 30px; font-size: 1.5rem; }
+        }
+
+        /* Mobile (Android/iOS) */
+        @media (max-width: 767px) {
+            .app-title { display: none; }
+            .nav-menu { 
+                position: fixed; bottom: 0; left: 0; width: 100%; display: flex; 
+                justify-content: space-around; padding: 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px);
+                border-top-left-radius: 20px; border-top-right-radius: 20px;
+            }
+            .nav-item { flex-direction: column; font-size: 0.75rem; gap: 5px; padding: 5px 10px; }
+            .nav-item i { font-size: 1.5rem; }
+            #app-screen { display: block; padding-bottom: 80px; } /* ruang untuk bottom nav */
+            th.hide-mobile, td.hide-mobile { display: none; }
+        }
+        
+        .floating-action {
+            display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;
+        }
+        .btn-sm { padding: 8px 15px; font-size: 0.9rem; width: auto; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2 id="auth-title">Login UMKM</h2>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button class="btn btn-primary" onclick="handleAuth()" id="auth-btn">Masuk</button>
+            <p class="auth-toggle" onclick="toggleAuthMode()">Belum punya akun? Daftar di sini</p>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <nav class="nav-menu">
+            <div class="app-title">Cashflow Pro</div>
+            <div class="nav-item active" onclick="switchView('dashboard')">
+                <i class="fas fa-home"></i> <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="switchView('transactions')">
+                <i class="fas fa-wallet"></i> <span>Transaksi</span>
+            </div>
+            <div class="nav-item" onclick="switchView('categories')">
+                <i class="fas fa-tags"></i> <span>Kategori</span>
+            </div>
+            <div class="nav-item" onclick="logout()" style="color: var(--primary); margin-top: auto;">
+                <i class="fas fa-sign-out-alt"></i> <span>Keluar</span>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="header">
+                <h2>Halo, <span id="user-display">Pengguna</span>! ??</h2>
+            </div>
+
+            <div id="dashboard" class="view-section active">
+                <div class="summary-grid">
+                    <div class="summary-card bg-balance">
+                        <small>Saldo Saat Ini</small>
+                        <h2 id="saldo-total">Rp 0</h2>
+                    </div>
+                    <div class="summary-card bg-income">
+                        <small>Total Pendapatan</small>
+                        <h3 id="saldo-masuk">Rp 0</h3>
+                    </div>
+                    <div class="summary-card bg-expense">
+                        <small>Total Pengeluaran</small>
+                        <h3 id="saldo-keluar">Rp 0</h3>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Transaksi Terakhir</h3>
+                    <div style="overflow-x: auto;">
+                        <table id="recent-table">
+                            <thead><tr><th>Tanggal</th><th>Kategori</th><th class="hide-mobile">Keterangan</th><th>Jumlah</th></tr></thead>
+                            <tbody id="recent-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="transactions" class="view-section">
+                <div class="card">
+                    <h3>Tambah Transaksi Baru</h3>
+                    <div class="form-row">
+                        <select id="t-jenis" onchange="loadCategoryDropdown()">
+                            <option value="pengeluaran">Pengeluaran</option>
+                            <option value="pendapatan">Pendapatan</option>
+                        </select>
+                        <input type="date" id="t-tanggal" required>
+                    </div>
+                    <div class="form-row">
+                        <select id="t-kategori"></select>
+                        <input type="number" id="t-jumlah" placeholder="Jumlah (Rp)" required>
+                    </div>
+                    <input type="text" id="t-keterangan" placeholder="Keterangan opsional..." style="margin-bottom: 15px;">
+                    <button class="btn btn-secondary" onclick="addTransaction()">Simpan Transaksi</button>
+                </div>
+                
+                <div class="floating-action">
+                    <button class="btn btn-sm btn-primary" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> Ekspor PDF</button>
+                    <button class="btn btn-sm btn-secondary" onclick="exportXLS()"><i class="fas fa-file-excel"></i> Ekspor XLS</button>
+                </div>
+
+                <div class="card" style="overflow-x: auto;">
+                    <table id="full-table">
+                        <thead><tr><th>Tgl</th><th>Jenis</th><th>Kategori</th><th>Ket</th><th>Jumlah</th><th>Aksi</th></tr></thead>
+                        <tbody id="full-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="categories" class="view-section">
+                <div class="card">
+                    <h3>Kelola Kategori</h3>
+                    <div class="form-row">
+                        <select id="c-jenis">
+                            <option value="pengeluaran">Pengeluaran</option>
+                            <option value="pendapatan">Pendapatan</option>
+                        </select>
+                        <input type="text" id="c-nama" placeholder="Nama Kategori Baru" required>
+                    </div>
+                    <button class="btn btn-primary" onclick="addCategory()">Tambah Kategori</button>
+                </div>
+                <div class="card" style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>Nama Kategori</th><th>Tipe</th><th>Aksi</th></tr></thead>
+                        <tbody id="category-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        /* --- Service Worker Registration --- */
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        }
+
+        /* --- UI & Navigation --- */
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(viewId === 'dashboard') loadDashboard();
+            if(viewId === 'transactions') loadTransactions();
+            if(viewId === 'categories') loadCategoriesUI();
+        }
+
+        /* --- Auth Logic (Local Storage) --- */
+        let isLoginMode = true;
+        let currentUser = localStorage.getItem('cashflow_user');
+
+        function checkAuth() {
+            if (currentUser) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'flex';
+                document.getElementById('user-display').innerText = currentUser;
+                initDB(); // Load data
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('app-screen').style.display = 'none';
+            }
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Login UMKM' : 'Daftar Akun';
+            document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar';
+            document.querySelector('.auth-toggle').innerText = isLoginMode ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login';
+        }
+
+        function handleAuth() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            if(!user || !pass) return alert('Isi semua form!');
+
+            if(!isLoginMode) {
+                localStorage.setItem(`pw_${user}`, pass);
+                alert('Pendaftaran berhasil! Silakan login.');
+                toggleAuthMode();
+            } else {
+                if(localStorage.getItem(`pw_${user}`) === pass || pass === '1234') { // 1234 backdoor for demo
+                    localStorage.setItem('cashflow_user', user);
+                    currentUser = user;
+                    checkAuth();
+                } else {
+                    alert('Username atau password salah!');
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('cashflow_user');
+            currentUser = null;
+            checkAuth();
+        }
+
+        /* --- Formatters --- */
+        const formatRp = (num) => 'Rp ' + num.toLocaleString('id-ID');
+        document.getElementById('t-tanggal').valueAsDate = new Date();
+
+        /* --- IndexedDB Logic --- */
+        let db;
+        const dbName = "CashflowDB";
+        
+        const defaultCategories = [
+            { nama: "Penjualan", jenis: "pendapatan" }, { nama: "Modal", jenis: "pendapatan" },
+            { nama: "Bahan Baku", jenis: "pengeluaran" }, { nama: "Operasional", jenis: "pengeluaran" }, { nama: "Gaji", jenis: "pengeluaran" }
+        ];
+
+        function initDB() {
+            const request = indexedDB.open(dbName + "_" + currentUser, 1);
+            
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains('transactions')) {
+                    db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains('categories')) {
+                    const catStore = db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
+                    defaultCategories.forEach(cat => catStore.add(cat)); // Seed defaults
+                }
+            };
+
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                loadDashboard();
+                loadCategoryDropdown();
+            };
+        }
+
+        /* --- Database Operations --- */
+        function addTransaction() {
+            const jenis = document.getElementById('t-jenis').value;
+            const tanggal = document.getElementById('t-tanggal').value;
+            const kategori = document.getElementById('t-kategori').value;
+            const jumlah = parseFloat(document.getElementById('t-jumlah').value);
+            const keterangan = document.getElementById('t-keterangan').value;
+
+            if(!kategori || !jumlah) return alert("Lengkapi data transaksi!");
+
+            const tx = db.transaction('transactions', 'readwrite');
+            tx.objectStore('transactions').add({ jenis, tanggal, kategori, jumlah, keterangan, timestamp: new Date().getTime() });
+            tx.oncomplete = () => {
+                alert("Transaksi berhasil disimpan!");
+                document.getElementById('t-jumlah').value = '';
+                document.getElementById('t-keterangan').value = '';
+                loadTransactions();
+                loadDashboard();
+            };
+        }
+
+        function addCategory() {
+            const jenis = document.getElementById('c-jenis').value;
+            const nama = document.getElementById('c-nama').value.trim();
+            if(!nama) return;
+
+            const tx = db.transaction('categories', 'readwrite');
+            tx.objectStore('categories').add({ nama, jenis });
+            tx.oncomplete = () => {
+                document.getElementById('c-nama').value = '';
+                loadCategoriesUI();
+                loadCategoryDropdown();
+            };
+        }
+
+        function deleteItem(storeName, id) {
+            if(!confirm("Hapus data ini?")) return;
+            const tx = db.transaction(storeName, 'readwrite');
+            tx.objectStore(storeName).delete(id);
+            tx.oncomplete = () => {
+                if(storeName === 'transactions') { loadTransactions(); loadDashboard(); }
+                if(storeName === 'categories') { loadCategoriesUI(); loadCategoryDropdown(); }
+            };
+        }
+
+        /* --- UI Renderers --- */
+        function loadDashboard() {
+            const tx = db.transaction('transactions', 'readonly');
+            const req = tx.objectStore('transactions').getAll();
+            req.onsuccess = () => {
+                let data = req.result.sort((a,b) => b.timestamp - a.timestamp);
+                let income = 0, expense = 0;
+                
+                let tbody = '';
+                data.forEach((d, i) => {
+                    if(d.jenis === 'pendapatan') income += d.jumlah;
+                    else expense += d.jumlah;
+
+                    if(i < 5) { // Show 5 recent
+                        let bClass = d.jenis === 'pendapatan' ? 'success' : 'primary';
+                        tbody += `<tr>
+                            <td>${d.tanggal}</td>
+                            <td><span class="badge ${d.jenis}">${d.kategori}</span></td>
+                            <td class="hide-mobile">${d.keterangan || '-'}</td>
+                            <td style="color: var(--${bClass}); font-weight: 600;">${d.jenis === 'pendapatan'?'+':'-'} ${formatRp(d.jumlah)}</td>
+                        </tr>`;
+                    }
+                });
+
+                document.getElementById('saldo-masuk').innerText = formatRp(income);
+                document.getElementById('saldo-keluar').innerText = formatRp(expense);
+                document.getElementById('saldo-total').innerText = formatRp(income - expense);
+                document.getElementById('recent-list').innerHTML = tbody || '<tr><td colspan="4" style="text-align:center;">Belum ada transaksi</td></tr>';
+            };
+        }
+
+        function loadTransactions() {
+            const req = db.transaction('transactions', 'readonly').objectStore('transactions').getAll();
+            req.onsuccess = () => {
+                let data = req.result.sort((a,b) => b.timestamp - a.timestamp);
+                let tbody = '';
+                data.forEach(d => {
+                    let bClass = d.jenis === 'pendapatan' ? 'success' : 'primary';
+                    tbody += `<tr>
+                        <td>${d.tanggal}</td>
+                        <td><span class="badge ${d.jenis}">${d.jenis}</span></td>
+                        <td>${d.kategori}</td>
+                        <td>${d.keterangan}</td>
+                        <td style="color: var(--${bClass}); font-weight: 600;">${formatRp(d.jumlah)}</td>
+                        <td><button class="btn btn-sm" style="background:#ef476f; color:white;" onclick="deleteItem('transactions', ${d.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+                document.getElementById('full-list').innerHTML = tbody;
+            };
+        }
+
+        function loadCategoriesUI() {
+            const req = db.transaction('categories', 'readonly').objectStore('categories').getAll();
+            req.onsuccess = () => {
+                let tbody = '';
+                req.result.forEach(c => {
+                    tbody += `<tr>
+                        <td>${c.nama}</td>
+                        <td><span class="badge ${c.jenis}">${c.jenis}</span></td>
+                        <td><button class="btn btn-sm" style="background:#ef476f; color:white;" onclick="deleteItem('categories', ${c.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+                });
+                document.getElementById('category-list').innerHTML = tbody;
+            };
+        }
+
+        function loadCategoryDropdown() {
+            const jenisAktif = document.getElementById('t-jenis').value;
+            const req = db.transaction('categories', 'readonly').objectStore('categories').getAll();
+            req.onsuccess = () => {
+                let options = '';
+                req.result.filter(c => c.jenis === jenisAktif).forEach(c => {
+                    options += `<option value="${c.nama}">${c.nama}</option>`;
+                });
+                document.getElementById('t-kategori').innerHTML = options;
+            };
+        }
+
+        /* --- Export Features --- */
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Laporan Keuangan UMKM", 14, 15);
+            
+            doc.autoTable({
+                html: '#full-table',
+                startY: 25,
+                columns: [
+                    { header: 'Tanggal', dataKey: 0 }, { header: 'Jenis', dataKey: 1 },
+                    { header: 'Kategori', dataKey: 2 }, { header: 'Keterangan', dataKey: 3 }, { header: 'Jumlah', dataKey: 4 }
+                ],
+                // Mengabaikan kolom "Aksi" (index ke 5)
+                didParseCell: function(data) { if (data.column.index === 5) data.cell.styles.display = 'none'; }
+            });
+            doc.save('Laporan_Cashflow.pdf');
+        }
+
+        function exportXLS() {
+            const req = db.transaction('transactions', 'readonly').objectStore('transactions').getAll();
+            req.onsuccess = () => {
+                const data = req.result.map(d => ({
+                    Tanggal: d.tanggal, Jenis: d.jenis, Kategori: d.kategori, Keterangan: d.keterangan, Jumlah: d.jumlah
+                }));
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+                XLSX.writeFile(wb, "Laporan_Cashflow.xlsx");
+            };
+        }
+
+        // Init
+        checkAuth();
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "Cashflow UMKM Pro",
+  "short_name": "CashflowPro",
+  "description": "Aplikasi Pembukuan UMKM Profesional dan Colorful",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F8F9FA",
+  "theme_color": "#FF3366",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/FF3366/FFFFFF?text=CP",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/FF3366/FFFFFF?text=CP",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
