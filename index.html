@@ -3,143 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cashflow UMKM Pro</title>
+    <title>Cashflow UMKM Pro - Holographic</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#FF3366">
+    <meta name="theme-color" content="#20D2D2">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&family=Space+Grotesk:wght@700&display=swap');
         
         :root {
-            --primary: #FF3366; /* Vibrant Pink/Red */
-            --secondary: #20D2D2; /* Cyan */
-            --accent: #FFD166; /* Yellow */
-            --success: #06D6A0; /* Green */
-            --bg: #F4F7FE;
-            --card-bg: #FFFFFF;
-            --text-dark: #2B2D42;
-            --text-light: #8D99AE;
-            --shadow: 0 8px 20px rgba(0,0,0,0.05);
-            --radius: 20px;
+            --primary: #FF3366; 
+            --secondary: #20D2D2; 
+            --accent: #FFD166; 
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-dark: #1E1E2F;
+            --shadow-glow: 0 8px 32px 0 rgba(32, 210, 210, 0.15);
+            --radius: 24px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg); color: var(--text-dark); overflow-x: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        
+        /* Animated Mesh Background */
+        body { 
+            background-color: #F4F7FE;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(255, 51, 102, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(32, 210, 210, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 209, 102, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-dark); overflow-x: hidden;
+        }
+
+        h1, h2, h3, .app-title, .amount { font-family: 'Space Grotesk', sans-serif; }
+
+        /* Glassmorphism Classes */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-glow);
+        }
 
         /* --- Auth Screen --- */
-        #auth-screen {
-            display: flex; height: 100vh; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        #auth-screen { display: flex; height: 100vh; align-items: center; justify-content: center; z-index: 1000; position: relative; }
+        .auth-card { padding: 2.5rem; width: 90%; max-width: 400px; text-align: center; }
+        .auth-card h2 { color: var(--text-dark); margin-bottom: 1.5rem; font-size: 2rem; background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .input-group input, select, input[type="date"], input[type="number"], input[type="text"] {
+            width: 100%; padding: 14px 20px; margin-bottom: 15px; border: 1px solid var(--glass-border);
+            border-radius: 12px; background: rgba(255,255,255,0.9); font-size: 1rem; outline: none; transition: 0.3s;
         }
-        .auth-card {
-            background: rgba(255, 255, 255, 0.95); padding: 2rem; border-radius: var(--radius);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 90%; max-width: 400px; text-align: center;
-        }
-        .auth-card h2 { color: var(--primary); margin-bottom: 1.5rem; font-weight: 800; }
-        .input-group { margin-bottom: 1rem; text-align: left; }
-        .input-group input {
-            width: 100%; padding: 12px 15px; border: 2px solid #E2E8F0; border-radius: 10px;
-            font-size: 1rem; outline: none; transition: 0.3s;
-        }
-        .input-group input:focus { border-color: var(--secondary); }
+        .input-group input:focus, input:focus, select:focus { border-color: var(--secondary); box-shadow: 0 0 10px rgba(32, 210, 210, 0.3); }
+        
         .btn {
-            width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
-            font-weight: 600; font-size: 1rem; color: white; transition: transform 0.2s; margin-bottom: 10px;
+            width: 100%; padding: 14px; border: none; border-radius: 12px; cursor: pointer;
+            font-weight: 600; font-size: 1rem; color: white; transition: 0.3s; margin-bottom: 10px;
+            font-family: 'Space Grotesk', sans-serif; letter-spacing: 1px; text-transform: uppercase;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background-color: var(--primary); }
-        .btn-secondary { background-color: var(--secondary); }
-        .auth-toggle { font-size: 0.9rem; color: var(--text-light); cursor: pointer; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(45deg, var(--primary), #FF6B8B); }
+        .btn-secondary { background: linear-gradient(45deg, var(--secondary), #48E5E5); }
+        .btn-sm { padding: 10px 15px; font-size: 0.85rem; width: auto; border-radius: 8px; }
 
         /* --- App Screen --- */
         #app-screen { display: none; height: 100vh; }
-        .nav-menu { background: var(--card-bg); box-shadow: var(--shadow); z-index: 100; }
+        .nav-menu { background: var(--glass-bg); backdrop-filter: blur(20px); border-right: 1px solid var(--glass-border); z-index: 100; }
         .nav-item { 
-            padding: 15px; cursor: pointer; color: var(--text-light); font-weight: 600;
-            display: flex; align-items: center; gap: 10px; transition: 0.3s;
+            padding: 15px 20px; cursor: pointer; color: #64748B; font-weight: 600;
+            display: flex; align-items: center; gap: 12px; transition: 0.3s; border-radius: 16px; margin: 5px 15px;
         }
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 1.2rem; }
+        .nav-item.active { background: rgba(32, 210, 210, 0.1); color: var(--secondary); box-shadow: inset 0 0 0 1px var(--secondary); }
+        .nav-item i { font-size: 1.3rem; }
         
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h2 { font-size: 1.8rem; }
         
-        /* Cards */
-        .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; }
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .card { padding: 25px; margin-bottom: 25px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        
+        /* Floating Amount Cards */
         .summary-card { 
-            padding: 20px; border-radius: var(--radius); color: white; display: flex; flex-direction: column; gap: 5px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 25px; display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden;
         }
-        .bg-income { background: linear-gradient(135deg, var(--success), #04B486); }
-        .bg-expense { background: linear-gradient(135deg, var(--primary), #D81B60); }
-        .bg-balance { background: linear-gradient(135deg, var(--secondary), #00A896); }
-        
-        /* Forms & Tables */
-        .form-row { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
-        select, input[type="date"], input[type="number"], input[type="text"] {
-            width: 100%; padding: 12px; border: 2px solid #E2E8F0; border-radius: 10px; outline: none; font-family: 'Poppins';
+        .summary-card::before {
+            content: ''; position: absolute; top: -50%; right: -50%; width: 100px; height: 100px;
+            background: rgba(255,255,255,0.2); border-radius: 50%; blur: 20px;
         }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #E2E8F0; }
-        th { color: var(--text-light); font-weight: 600; }
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: white; }
-        .badge.pendapatan { background: var(--success); }
-        .badge.pengeluaran { background: var(--primary); }
+        .summary-card h2, .summary-card h3 { font-size: 2rem; z-index: 1; }
+        .bg-balance { background: linear-gradient(135deg, #1A2980, #26D0CE); color: white; }
+        .bg-income { background: linear-gradient(135deg, #11998E, #38EF7D); color: white; }
+        .bg-expense { background: linear-gradient(135deg, #FF416C, #FF4B2B); color: white; }
 
-        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        /* AI Insight Banner */
+        .ai-insight {
+            background: linear-gradient(90deg, rgba(32,210,210,0.1), rgba(255,209,102,0.1));
+            border-left: 4px solid var(--secondary); padding: 15px 20px; border-radius: 12px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
+        }
+        .ai-insight i { color: var(--secondary); font-size: 1.5rem; animation: pulse 2s infinite; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        /* Input Voice Wrapper */
+        .voice-input-wrapper { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .btn-mic { background: var(--glass-bg); border: 1px solid var(--primary); color: var(--primary); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .btn-mic:hover { background: var(--primary); color: white; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        th { color: #64748B; font-weight: 600; padding: 0 15px 10px; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        td { padding: 15px; background: rgba(255,255,255,0.5); }
+        tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+        tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+        .badge { padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; font-family: 'Space Grotesk'; }
+        .badge.pendapatan { background: rgba(17, 153, 142, 0.15); color: #11998E; }
+        .badge.pengeluaran { background: rgba(255, 65, 108, 0.15); color: #FF416C; }
+
+        .view-section { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- RESPONSIVE LAYOUTS --- */
         /* Desktop & Tablet */
         @media (min-width: 768px) {
             #app-screen { display: flex; }
-            .nav-menu { width: 250px; height: 100vh; flex-direction: column; padding-top: 20px; display: block; }
-            .nav-item { margin: 10px 20px; border-radius: 10px; }
-            .nav-item:hover { background: var(--bg); }
-            .bottom-nav { display: none; }
-            .form-row { grid-template-columns: 1fr 1fr; }
-            .app-title { text-align: center; font-weight: 800; color: var(--primary); margin-bottom: 30px; font-size: 1.5rem; }
+            .nav-menu { width: 280px; flex-direction: column; padding-top: 30px; }
+            .app-title { text-align: center; font-weight: 800; background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 40px; font-size: 1.8rem; }
+            .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         }
 
-        /* Mobile (Android/iOS) */
+        /* Mobile */
         @media (max-width: 767px) {
             .app-title { display: none; }
-            .nav-menu { 
-                position: fixed; bottom: 0; left: 0; width: 100%; display: flex; 
-                justify-content: space-around; padding: 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px);
-                border-top-left-radius: 20px; border-top-right-radius: 20px;
-            }
-            .nav-item { flex-direction: column; font-size: 0.75rem; gap: 5px; padding: 5px 10px; }
-            .nav-item i { font-size: 1.5rem; }
-            #app-screen { display: block; padding-bottom: 80px; } /* ruang untuk bottom nav */
+            .nav-menu { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid var(--glass-border); border-right: none; }
+            .nav-item { flex-direction: column; font-size: 0.75rem; gap: 5px; padding: 8px; margin: 0; border-radius: 12px; }
+            #app-screen { display: block; padding-bottom: 90px; }
             th.hide-mobile, td.hide-mobile { display: none; }
         }
         
-        .floating-action {
-            display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px;
-        }
-        .btn-sm { padding: 8px 15px; font-size: 0.9rem; width: auto; border-radius: 8px; }
+        .floating-action { display: flex; gap: 15px; justify-content: flex-end; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
-        <div class="auth-card">
-            <h2 id="auth-title">Login UMKM</h2>
+        <div class="auth-card glass">
+            <h2 id="auth-title">Holo System</h2>
             <div class="input-group">
-                <input type="text" id="username" placeholder="Username" required>
+                <input type="text" id="username" placeholder="Username" value="Rafly" required>
             </div>
             <div class="input-group">
-                <input type="password" id="password" placeholder="Password" required>
+                <input type="password" id="password" placeholder="Password (isi 1234)" value="1234" required>
             </div>
-            <button class="btn btn-primary" onclick="handleAuth()" id="auth-btn">Masuk</button>
-            <p class="auth-toggle" onclick="toggleAuthMode()">Belum punya akun? Daftar di sini</p>
+            <button class="btn btn-primary" onclick="handleAuth()" id="auth-btn">Inisiasi Sistem</button>
         </div>
     </div>
 
@@ -147,44 +168,53 @@
         <nav class="nav-menu">
             <div class="app-title">Cashflow Pro</div>
             <div class="nav-item active" onclick="switchView('dashboard')">
-                <i class="fas fa-home"></i> <span>Dashboard</span>
+                <i class="fas fa-border-all"></i> <span>Dashboard</span>
             </div>
             <div class="nav-item" onclick="switchView('transactions')">
-                <i class="fas fa-wallet"></i> <span>Transaksi</span>
+                <i class="fas fa-bolt"></i> <span>Transaksi</span>
             </div>
             <div class="nav-item" onclick="switchView('categories')">
-                <i class="fas fa-tags"></i> <span>Kategori</span>
+                <i class="fas fa-layer-group"></i> <span>Kategori</span>
             </div>
-            <div class="nav-item" onclick="logout()" style="color: var(--primary); margin-top: auto;">
-                <i class="fas fa-sign-out-alt"></i> <span>Keluar</span>
+            <div class="nav-item" onclick="logout()" style="margin-top: auto;">
+                <i class="fas fa-power-off"></i> <span>Keluar</span>
             </div>
         </nav>
 
         <main class="main-content">
             <div class="header">
-                <h2>Halo, <span id="user-display">Pengguna</span>! ??</h2>
+                <h2>Halo, <span id="user-display">Pengguna</span> ✨</h2>
             </div>
 
             <div id="dashboard" class="view-section active">
-                <div class="summary-grid">
-                    <div class="summary-card bg-balance">
-                        <small>Saldo Saat Ini</small>
-                        <h2 id="saldo-total">Rp 0</h2>
-                    </div>
-                    <div class="summary-card bg-income">
-                        <small>Total Pendapatan</small>
-                        <h3 id="saldo-masuk">Rp 0</h3>
-                    </div>
-                    <div class="summary-card bg-expense">
-                        <small>Total Pengeluaran</small>
-                        <h3 id="saldo-keluar">Rp 0</h3>
+                <div class="ai-insight glass">
+                    <i class="fas fa-robot"></i>
+                    <div>
+                        <strong>Analisis Cerdas:</strong>
+                        <span id="ai-text">Memproses data keuangan Anda...</span>
                     </div>
                 </div>
-                <div class="card">
-                    <h3>Transaksi Terakhir</h3>
+
+                <div class="summary-grid">
+                    <div class="summary-card bg-balance glass">
+                        <small>Saldo Utama</small>
+                        <h2 id="saldo-total" class="amount">Rp 0</h2>
+                    </div>
+                    <div class="summary-card bg-income glass">
+                        <small>Pemasukan</small>
+                        <h3 id="saldo-masuk" class="amount">Rp 0</h3>
+                    </div>
+                    <div class="summary-card bg-expense glass">
+                        <small>Pengeluaran</small>
+                        <h3 id="saldo-keluar" class="amount">Rp 0</h3>
+                    </div>
+                </div>
+
+                <div class="card glass">
+                    <h3>Aktivitas Terkini</h3>
                     <div style="overflow-x: auto;">
-                        <table id="recent-table">
-                            <thead><tr><th>Tanggal</th><th>Kategori</th><th class="hide-mobile">Keterangan</th><th>Jumlah</th></tr></thead>
+                        <table>
+                            <thead><tr><th>Tanggal</th><th>Label</th><th class="hide-mobile">Catatan</th><th>Nominal</th></tr></thead>
                             <tbody id="recent-list"></tbody>
                         </table>
                     </div>
@@ -192,8 +222,8 @@
             </div>
 
             <div id="transactions" class="view-section">
-                <div class="card">
-                    <h3>Tambah Transaksi Baru</h3>
+                <div class="card glass">
+                    <h3>Entri Transaksi Baru</h3>
                     <div class="form-row">
                         <select id="t-jenis" onchange="loadCategoryDropdown()">
                             <option value="pengeluaran">Pengeluaran</option>
@@ -203,28 +233,35 @@
                     </div>
                     <div class="form-row">
                         <select id="t-kategori"></select>
-                        <input type="number" id="t-jumlah" placeholder="Jumlah (Rp)" required>
+                        <input type="number" id="t-jumlah" placeholder="Nominal (Rp)" required>
                     </div>
-                    <input type="text" id="t-keterangan" placeholder="Keterangan opsional..." style="margin-bottom: 15px;">
-                    <button class="btn btn-secondary" onclick="addTransaction()">Simpan Transaksi</button>
+                    
+                    <div class="voice-input-wrapper">
+                        <input type="text" id="t-keterangan" placeholder="Catatan transaksi..." style="margin-bottom: 0;">
+                        <button class="btn-mic" onclick="startVoiceInput()" title="Bicara untuk mengisi catatan">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="addTransaction()">Simpan Entri</button>
                 </div>
                 
                 <div class="floating-action">
-                    <button class="btn btn-sm btn-primary" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> Ekspor PDF</button>
-                    <button class="btn btn-sm btn-secondary" onclick="exportXLS()"><i class="fas fa-file-excel"></i> Ekspor XLS</button>
+                    <button class="btn btn-sm glass" style="border-color: var(--primary); color: var(--primary);" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-sm glass" style="border-color: var(--secondary); color: var(--secondary);" onclick="exportXLS()"><i class="fas fa-file-excel"></i> XLS</button>
                 </div>
 
-                <div class="card" style="overflow-x: auto;">
-                    <table id="full-table">
-                        <thead><tr><th>Tgl</th><th>Jenis</th><th>Kategori</th><th>Ket</th><th>Jumlah</th><th>Aksi</th></tr></thead>
+                <div class="card glass" style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>Tgl</th><th>Tipe</th><th>Kategori</th><th>Catatan</th><th>Nominal</th><th>Aksi</th></tr></thead>
                         <tbody id="full-list"></tbody>
                     </table>
                 </div>
             </div>
 
             <div id="categories" class="view-section">
-                <div class="card">
-                    <h3>Kelola Kategori</h3>
+                <div class="card glass">
+                    <h3>Sistem Kategori</h3>
                     <div class="form-row">
                         <select id="c-jenis">
                             <option value="pengeluaran">Pengeluaran</option>
@@ -232,11 +269,11 @@
                         </select>
                         <input type="text" id="c-nama" placeholder="Nama Kategori Baru" required>
                     </div>
-                    <button class="btn btn-primary" onclick="addCategory()">Tambah Kategori</button>
+                    <button class="btn btn-primary" onclick="addCategory()">Registrasi Kategori</button>
                 </div>
-                <div class="card" style="overflow-x: auto;">
+                <div class="card glass" style="overflow-x: auto;">
                     <table>
-                        <thead><tr><th>Nama Kategori</th><th>Tipe</th><th>Aksi</th></tr></thead>
+                        <thead><tr><th>Label Kategori</th><th>Sifat</th><th>Aksi</th></tr></thead>
                         <tbody id="category-list"></tbody>
                     </table>
                 </div>
@@ -245,12 +282,8 @@
     </div>
 
     <script>
-        /* --- Service Worker Registration --- */
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
-        }
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
 
-        /* --- UI & Navigation --- */
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -261,90 +294,86 @@
             if(viewId === 'categories') loadCategoriesUI();
         }
 
-        /* --- Auth Logic (Local Storage) --- */
-        let isLoginMode = true;
-        let currentUser = localStorage.getItem('cashflow_user');
+        let currentUser = localStorage.getItem('cashflow_user_holo');
 
         function checkAuth() {
             if (currentUser) {
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'flex';
                 document.getElementById('user-display').innerText = currentUser;
-                initDB(); // Load data
+                initDB(); 
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('app-screen').style.display = 'none';
             }
         }
 
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? 'Login UMKM' : 'Daftar Akun';
-            document.getElementById('auth-btn').innerText = isLoginMode ? 'Masuk' : 'Daftar';
-            document.querySelector('.auth-toggle').innerText = isLoginMode ? 'Belum punya akun? Daftar di sini' : 'Sudah punya akun? Login';
-        }
-
         function handleAuth() {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
-            if(!user || !pass) return alert('Isi semua form!');
-
-            if(!isLoginMode) {
-                localStorage.setItem(`pw_${user}`, pass);
-                alert('Pendaftaran berhasil! Silakan login.');
-                toggleAuthMode();
+            if(!user || !pass) return alert('Autentikasi gagal. Isi data.');
+            
+            if(pass === '1234') { 
+                localStorage.setItem('cashflow_user_holo', user);
+                currentUser = user;
+                checkAuth();
             } else {
-                if(localStorage.getItem(`pw_${user}`) === pass || pass === '1234') { // 1234 backdoor for demo
-                    localStorage.setItem('cashflow_user', user);
-                    currentUser = user;
-                    checkAuth();
-                } else {
-                    alert('Username atau password salah!');
-                }
+                alert('Kode akses ditolak!');
             }
         }
 
-        function logout() {
-            localStorage.removeItem('cashflow_user');
-            currentUser = null;
-            checkAuth();
-        }
+        function logout() { localStorage.removeItem('cashflow_user_holo'); currentUser = null; checkAuth(); }
 
-        /* --- Formatters --- */
         const formatRp = (num) => 'Rp ' + num.toLocaleString('id-ID');
         document.getElementById('t-tanggal').valueAsDate = new Date();
 
-        /* --- IndexedDB Logic --- */
-        let db;
-        const dbName = "CashflowDB";
-        
+        /* --- Voice Input (Futuristic Feature) --- */
+        function startVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return alert('Browser Anda belum mendukung input suara holografik.');
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'id-ID';
+            recognition.interimResults = false;
+            
+            document.querySelector('.btn-mic').style.background = 'var(--primary)';
+            document.querySelector('.btn-mic').style.color = 'white';
+            document.querySelector('.btn-mic').classList.add('pulse-anim');
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('t-keterangan').value = transcript;
+            };
+
+            recognition.onend = () => {
+                document.querySelector('.btn-mic').style.background = 'var(--glass-bg)';
+                document.querySelector('.btn-mic').style.color = 'var(--primary)';
+            }
+        }
+
+        /* --- IndexedDB --- */
+        let db; const dbName = "HoloCashflowDB";
         const defaultCategories = [
-            { nama: "Penjualan", jenis: "pendapatan" }, { nama: "Modal", jenis: "pendapatan" },
-            { nama: "Bahan Baku", jenis: "pengeluaran" }, { nama: "Operasional", jenis: "pengeluaran" }, { nama: "Gaji", jenis: "pengeluaran" }
+            { nama: "Penjualan", jenis: "pendapatan" }, { nama: "Injeksi Modal", jenis: "pendapatan" },
+            { nama: "Komponen/Bahan", jenis: "pengeluaran" }, { nama: "Operasional", jenis: "pengeluaran" }, { nama: "Gaji/Fee", jenis: "pengeluaran" }
         ];
 
         function initDB() {
             const request = indexedDB.open(dbName + "_" + currentUser, 1);
-            
             request.onupgradeneeded = (e) => {
                 db = e.target.result;
-                if (!db.objectStoreNames.contains('transactions')) {
-                    db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
-                }
+                if (!db.objectStoreNames.contains('transactions')) db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
                 if (!db.objectStoreNames.contains('categories')) {
                     const catStore = db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
-                    defaultCategories.forEach(cat => catStore.add(cat)); // Seed defaults
+                    defaultCategories.forEach(cat => catStore.add(cat));
                 }
             };
-
-            request.onsuccess = (e) => {
-                db = e.target.result;
-                loadDashboard();
-                loadCategoryDropdown();
-            };
+            request.onsuccess = (e) => { db = e.target.result; loadDashboard(); loadCategoryDropdown(); };
         }
 
-        /* --- Database Operations --- */
         function addTransaction() {
             const jenis = document.getElementById('t-jenis').value;
             const tanggal = document.getElementById('t-tanggal').value;
@@ -352,16 +381,13 @@
             const jumlah = parseFloat(document.getElementById('t-jumlah').value);
             const keterangan = document.getElementById('t-keterangan').value;
 
-            if(!kategori || !jumlah) return alert("Lengkapi data transaksi!");
+            if(!kategori || !jumlah) return alert("Deteksi error: Data tidak lengkap!");
 
             const tx = db.transaction('transactions', 'readwrite');
             tx.objectStore('transactions').add({ jenis, tanggal, kategori, jumlah, keterangan, timestamp: new Date().getTime() });
             tx.oncomplete = () => {
-                alert("Transaksi berhasil disimpan!");
-                document.getElementById('t-jumlah').value = '';
-                document.getElementById('t-keterangan').value = '';
-                loadTransactions();
-                loadDashboard();
+                document.getElementById('t-jumlah').value = ''; document.getElementById('t-keterangan').value = '';
+                loadTransactions(); loadDashboard();
             };
         }
 
@@ -369,18 +395,13 @@
             const jenis = document.getElementById('c-jenis').value;
             const nama = document.getElementById('c-nama').value.trim();
             if(!nama) return;
-
             const tx = db.transaction('categories', 'readwrite');
             tx.objectStore('categories').add({ nama, jenis });
-            tx.oncomplete = () => {
-                document.getElementById('c-nama').value = '';
-                loadCategoriesUI();
-                loadCategoryDropdown();
-            };
+            tx.oncomplete = () => { document.getElementById('c-nama').value = ''; loadCategoriesUI(); loadCategoryDropdown(); };
         }
 
         function deleteItem(storeName, id) {
-            if(!confirm("Hapus data ini?")) return;
+            if(!confirm("Hapus fragmen data ini?")) return;
             const tx = db.transaction(storeName, 'readwrite');
             tx.objectStore(storeName).delete(id);
             tx.oncomplete = () => {
@@ -389,26 +410,29 @@
             };
         }
 
-        /* --- UI Renderers --- */
+        /* --- UI Renderers & AI Insight --- */
         function loadDashboard() {
-            const tx = db.transaction('transactions', 'readonly');
-            const req = tx.objectStore('transactions').getAll();
+            const req = db.transaction('transactions', 'readonly').objectStore('transactions').getAll();
             req.onsuccess = () => {
                 let data = req.result.sort((a,b) => b.timestamp - a.timestamp);
                 let income = 0, expense = 0;
+                let pengeluaranKategori = {};
                 
                 let tbody = '';
                 data.forEach((d, i) => {
                     if(d.jenis === 'pendapatan') income += d.jumlah;
-                    else expense += d.jumlah;
+                    else {
+                        expense += d.jumlah;
+                        pengeluaranKategori[d.kategori] = (pengeluaranKategori[d.kategori] || 0) + d.jumlah;
+                    }
 
-                    if(i < 5) { // Show 5 recent
-                        let bClass = d.jenis === 'pendapatan' ? 'success' : 'primary';
+                    if(i < 5) { 
+                        let color = d.jenis === 'pendapatan' ? '#11998E' : '#FF416C';
                         tbody += `<tr>
                             <td>${d.tanggal}</td>
                             <td><span class="badge ${d.jenis}">${d.kategori}</span></td>
                             <td class="hide-mobile">${d.keterangan || '-'}</td>
-                            <td style="color: var(--${bClass}); font-weight: 600;">${d.jenis === 'pendapatan'?'+':'-'} ${formatRp(d.jumlah)}</td>
+                            <td style="color: ${color}; font-weight: 700; font-family:'Space Grotesk';">${d.jenis === 'pendapatan'?'+':'-'} ${formatRp(d.jumlah)}</td>
                         </tr>`;
                     }
                 });
@@ -416,7 +440,24 @@
                 document.getElementById('saldo-masuk').innerText = formatRp(income);
                 document.getElementById('saldo-keluar').innerText = formatRp(expense);
                 document.getElementById('saldo-total').innerText = formatRp(income - expense);
-                document.getElementById('recent-list').innerHTML = tbody || '<tr><td colspan="4" style="text-align:center;">Belum ada transaksi</td></tr>';
+                document.getElementById('recent-list').innerHTML = tbody || '<tr><td colspan="4" style="text-align:center;">Belum ada entri data</td></tr>';
+
+                // AI Insight Logic
+                let biggestExpenseCat = ""; let maxExpense = 0;
+                for(const cat in pengeluaranKategori) {
+                    if(pengeluaranKategori[cat] > maxExpense) { maxExpense = pengeluaranKategori[cat]; biggestExpenseCat = cat; }
+                }
+                
+                const aiText = document.getElementById('ai-text');
+                if (expense === 0 && income === 0) {
+                    aiText.innerText = "Sistem siap. Mulai catat transaksi untuk mendapatkan analisis.";
+                } else if (expense > income) {
+                    aiText.innerText = `Peringatan: Pengeluaran melebihi pemasukan. Kebocoran terbesar di kategori "${biggestExpenseCat}".`;
+                } else if (biggestExpenseCat) {
+                    aiText.innerText = `Arus kas positif! Pengeluaran tertinggi Anda ada di "${biggestExpenseCat}" (${formatRp(maxExpense)}).`;
+                } else {
+                    aiText.innerText = "Kondisi finansial stabil. Pertahankan ritme ini.";
+                }
             };
         }
 
@@ -426,14 +467,14 @@
                 let data = req.result.sort((a,b) => b.timestamp - a.timestamp);
                 let tbody = '';
                 data.forEach(d => {
-                    let bClass = d.jenis === 'pendapatan' ? 'success' : 'primary';
+                    let color = d.jenis === 'pendapatan' ? '#11998E' : '#FF416C';
                     tbody += `<tr>
                         <td>${d.tanggal}</td>
                         <td><span class="badge ${d.jenis}">${d.jenis}</span></td>
                         <td>${d.kategori}</td>
                         <td>${d.keterangan}</td>
-                        <td style="color: var(--${bClass}); font-weight: 600;">${formatRp(d.jumlah)}</td>
-                        <td><button class="btn btn-sm" style="background:#ef476f; color:white;" onclick="deleteItem('transactions', ${d.id})"><i class="fas fa-trash"></i></button></td>
+                        <td style="color: ${color}; font-weight: 700; font-family:'Space Grotesk';">${formatRp(d.jumlah)}</td>
+                        <td><button class="btn btn-sm" style="background:rgba(255, 65, 108, 0.8); color:white; border:none;" onclick="deleteItem('transactions', ${d.id})"><i class="fas fa-trash"></i></button></td>
                     </tr>`;
                 });
                 document.getElementById('full-list').innerHTML = tbody;
@@ -448,7 +489,7 @@
                     tbody += `<tr>
                         <td>${c.nama}</td>
                         <td><span class="badge ${c.jenis}">${c.jenis}</span></td>
-                        <td><button class="btn btn-sm" style="background:#ef476f; color:white;" onclick="deleteItem('categories', ${c.id})"><i class="fas fa-trash"></i></button></td>
+                        <td><button class="btn btn-sm" style="background:rgba(255, 65, 108, 0.8); color:white; border:none;" onclick="deleteItem('categories', ${c.id})"><i class="fas fa-trash"></i></button></td>
                     </tr>`;
                 });
                 document.getElementById('category-list').innerHTML = tbody;
@@ -460,46 +501,33 @@
             const req = db.transaction('categories', 'readonly').objectStore('categories').getAll();
             req.onsuccess = () => {
                 let options = '';
-                req.result.filter(c => c.jenis === jenisAktif).forEach(c => {
-                    options += `<option value="${c.nama}">${c.nama}</option>`;
-                });
+                req.result.filter(c => c.jenis === jenisAktif).forEach(c => { options += `<option value="${c.nama}">${c.nama}</option>`; });
                 document.getElementById('t-kategori').innerHTML = options;
             };
         }
 
         /* --- Export Features --- */
         function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text("Laporan Keuangan UMKM", 14, 15);
-            
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.text("Data Finansial UMKM", 14, 15);
             doc.autoTable({
-                html: '#full-table',
-                startY: 25,
-                columns: [
-                    { header: 'Tanggal', dataKey: 0 }, { header: 'Jenis', dataKey: 1 },
-                    { header: 'Kategori', dataKey: 2 }, { header: 'Keterangan', dataKey: 3 }, { header: 'Jumlah', dataKey: 4 }
-                ],
-                // Mengabaikan kolom "Aksi" (index ke 5)
+                html: '#full-table', startY: 25,
+                columns: [{header:'Tanggal',dataKey:0}, {header:'Jenis',dataKey:1}, {header:'Kategori',dataKey:2}, {header:'Catatan',dataKey:3}, {header:'Nominal',dataKey:4}],
                 didParseCell: function(data) { if (data.column.index === 5) data.cell.styles.display = 'none'; }
             });
-            doc.save('Laporan_Cashflow.pdf');
+            doc.save('Data_Holo_Cashflow.pdf');
         }
 
         function exportXLS() {
             const req = db.transaction('transactions', 'readonly').objectStore('transactions').getAll();
             req.onsuccess = () => {
-                const data = req.result.map(d => ({
-                    Tanggal: d.tanggal, Jenis: d.jenis, Kategori: d.kategori, Keterangan: d.keterangan, Jumlah: d.jumlah
-                }));
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wb = XLSX.utils.book_new();
+                const data = req.result.map(d => ({ Tanggal: d.tanggal, Jenis: d.jenis, Kategori: d.kategori, Catatan: d.keterangan, Nominal: d.jumlah }));
+                const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-                XLSX.writeFile(wb, "Laporan_Cashflow.xlsx");
+                XLSX.writeFile(wb, "Data_Holo_Cashflow.xlsx");
             };
         }
 
-        // Init
         checkAuth();
     </script>
 </body>
