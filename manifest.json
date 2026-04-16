@@ -1,22 +1,24 @@
 {
-  "name": "Cashflow UMKM Pro",
+  "name": "Cashflow Pro Aurora",
   "short_name": "CashflowPro",
-  "description": "Sistem Pembukuan Pintar dengan UI Holographic",
+  "description": "Sistem Pembukuan Futuristik dan Elegan",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#F4F7FE",
-  "theme_color": "#20D2D2",
-  "orientation": "any",
+  "background_color": "#F8FAFC",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192/20D2D2/FFFFFF?text=CP",
+      "src": "https://via.placeholder.com/192/8B5CF6/FFFFFF?text=CF",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://via.placeholder.com/512/FF3366/FFFFFF?text=CP",
+      "src": "https://via.placeholder.com/512/EC4899/FFFFFF?text=CF",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
